@@ -3,9 +3,11 @@ A python library for making pressure tap plots
 
 *Click the images to view interactive Plotly visualizations*
 
-| 2D Line Plot | 2D Needle Plot | 3D Dot Plot |
-| :---: | :---: | :---: |
-| [![DrivAer 2D](demo_data/drivAer_lineplot/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_lineplot/drivAer_multi_series.html) | [![DrivAer Needle](demo_data/drivAer_needleplot/drivAer_needleplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_needleplot/drivAer_needleplot.html) | [![DrivAer 3D](demo_data/drivAer_dotplot/drivAer_dotplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_dotplot/drivAer_dotplot.html) |
+| Plot Type | Preview |
+| :--- | :---: |
+| **2D Line Plot** | [![DrivAer 2D](demo_data/drivAer_lineplot/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_lineplot/drivAer_multi_series.html) |
+| **2D Needle Plot** | [![DrivAer Needle](demo_data/drivAer_needleplot/drivAer_needleplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_needleplot/drivAer_needleplot.html) |
+| **3D Dot Plot** | [![DrivAer 3D](demo_data/drivAer_dotplot/drivAer_dotplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_dotplot/drivAer_dotplot.html) |
 
 ## Installation
 
