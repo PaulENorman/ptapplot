@@ -201,8 +201,9 @@ def render_plot(json_path):
         plot_bgcolor="white",
         showlegend=True,
     )
-    fig.write_html("drivAer_multi_series.html", include_plotlyjs="cdn")
-    print("Saved: drivAer_multi_series.html")
+    out_html = os.path.join(os.path.dirname(json_path), "drivAer_multi_series.html")
+    fig.write_html(out_html, include_plotlyjs="cdn")
+    print(f"Saved: {out_html}")
 
 
 if __name__ == "__main__":
