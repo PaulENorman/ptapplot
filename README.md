@@ -5,7 +5,7 @@ A python library for making pressure tap plots
 
 | 2D Needle Plot | 3D Dot Plot |
 | :---: | :---: |
-| [![DrivAer 2D](demo_data/drivAer_lineplot/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_lineplot/drivAer_multi_series.html) | [![DrivAer 3D](demo_data/drivAer_dotplot/drivAer_dotplot_preview.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_dotplot/drivAer_dotplot.html) |
+| [![DrivAer 2D](demo_data/drivAer_lineplot/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_lineplot/drivAer_multi_series.html) | [![DrivAer 3D](demo_data/drivAer_dotplot/drivAer_dotplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_dotplot/drivAer_dotplot.html) |
 
 ## Usage Flow
 
