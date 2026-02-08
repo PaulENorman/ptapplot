@@ -37,8 +37,13 @@ def render_plot(json_path):
     maps physical coordinates to image pixel space, and generates
     an interactive Plotly figure with local pressure axes (needles).
     """
+    import re
+
     with open(json_path, "r") as f:
-        config = json.load(f)
+        # Remove comments before parsing JSON (supports # style comments)
+        content = f.read()
+        content = re.sub(r"#.*", "", content)
+        config = json.loads(content)
     img = Image.open(os.path.join(os.path.dirname(json_path), config["image_path"]))
     w, h = img.size
     pxmin, pymin, pxmax, pymax = get_image_bbox(
@@ -160,9 +165,24 @@ def render_plot(json_path):
     )
 
     series_names = config.get("series_names", [])
+    series_prefs = config.get("series_preferences", [])
     breaks = [set(b) for b in config.get("line_breaks", [])]
-    for i, cp in enumerate(taps["Cp"][:2]):
+    for i, cp in enumerate(taps["Cp"]):
         name = series_names[i] if i < len(series_names) else f"Case {i + 1}"
+
+        # Default preferences
+        pref = {
+            "line_color": config["series_colors"][i % len(config["series_colors"])],
+            "line_width": 2,
+            "line_dash": "solid",
+            "show_markers": True,
+            "marker_size": 4,
+            "marker_symbol": "circle",
+        }
+        # Override with user preferences if available
+        if i < len(series_prefs):
+            pref.update(series_prefs[i])
+
         xp, yp = (
             df["xi"] + np.array(cp) * scale * df["nux"],
             h - (df["yi"] + np.array(cp) * scale * df["nuy"]),
@@ -184,10 +204,14 @@ def render_plot(json_path):
             go.Scatter(
                 x=x_plot,
                 y=y_plot,
-                mode="lines+markers",
+                mode="lines+markers" if pref["show_markers"] else "lines",
                 name=name,
-                line=dict(color=config["series_colors"][i], width=2),
-                marker=dict(size=4),
+                line=dict(
+                    color=pref["line_color"],
+                    width=pref["line_width"],
+                    dash=pref["line_dash"],
+                ),
+                marker=dict(size=pref["marker_size"], symbol=pref["marker_symbol"]),
                 text=cp_plot,
                 customdata=tap_plot,
                 hovertemplate=f"<b>{name}</b><br>Tap: %{{customdata}}<br>Cp: %{{text:.3f}}<extra></extra>",

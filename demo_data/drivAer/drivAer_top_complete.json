@@ -358,6 +358,24 @@
     ]
   },
   "series_names": [],
+  "series_preferences": [
+    {
+      "line_color": "red",
+      "line_width": 3,
+      "line_dash": "solid",
+      "show_markers": true,
+      "marker_size": 6,
+      "marker_symbol": "circle"
+    },
+    {
+      "line_color": "blue",
+      "line_width": 2,
+      "line_dash": "dash",
+      "show_markers": true,
+      "marker_size": 4,
+      "marker_symbol": "square"
+    }
+  ],
   "line_breaks": [
     [
       203,
@@ -374,6 +392,11 @@
     1.2
   ],
   "num_ticks": 4,
+  "relax_normals": false,
+  "relax_iterations": 50,
+  "relax_factor": 0.2,
+  "relax_uncross": true,
+  "relax_fix_endpoints": true,
   "series_colors": [
     "red",
     "blue",

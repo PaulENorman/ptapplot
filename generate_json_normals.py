@@ -17,9 +17,9 @@ def complete_json(json_path, sort_dir="x"):
         sort_dir (str): Dataframe column name to sort taps by (default 'x').
     """
     with open(json_path, "r") as f:
-        # Remove comments before parsing JSON
+        # Remove comments before parsing JSON (supports # style comments)
         content = f.read()
-        content = re.sub(r"//.*", "", content)
+        content = re.sub(r"#.*", "", content)
         config = json.loads(content)
 
     base_dir = os.path.dirname(json_path)
@@ -61,6 +61,71 @@ def complete_json(json_path, sort_dir="x"):
         normals.append(
             [float(nx / norm), float(ny / norm), 0.0] if norm > 0 else [0.0, 1.0, 0.0]
         )
+
+    # Relaxation Algorithm: Smooth and uncross normals to improve plot legibility
+    if config.get("relax_normals", False):
+        iters = config.get("relax_iterations", 10)
+        alpha = config.get("relax_factor", 0.1)
+        breaks = [set(b) for b in config.get("line_breaks", [])]
+
+        for _ in range(iters):
+            new_normals = [n[:] for n in normals]
+            for i in range(1, len(normals) - 1):
+                # Don't relax across line breaks
+                n_id = df.iloc[i]["number"]
+                n_prev_id = df.iloc[i - 1]["number"]
+                n_next_id = df.iloc[i + 1]["number"]
+
+                if {int(n_id), int(n_prev_id)} in breaks or {
+                    int(n_id),
+                    int(n_next_id),
+                } in breaks:
+                    continue
+
+                # Smooth with neighbors
+                avg_nx = (normals[i - 1][0] + normals[i + 1][0]) / 2.0
+                avg_ny = (normals[i - 1][1] + normals[i + 1][1]) / 2.0
+
+                new_normals[i][0] = normals[i][0] * (1 - alpha) + avg_nx * alpha
+                new_normals[i][1] = normals[i][1] * (1 - alpha) + avg_ny * alpha
+
+                # Explicit Uncrossing: If adjacent normals are converging too sharply, make them more parallel
+                if config.get("relax_uncross", False):
+                    # Position at max Cp range
+                    max_y = config.get("y_range", [0, 1.2])[1]
+                    scale = config.get("cp_scale", 100)
+                    # Check convergence with previous
+                    p_curr = np.array(
+                        [
+                            df.iloc[i]["x"] + new_normals[i][0] * max_y * scale,
+                            df.iloc[i]["y"] + new_normals[i][1] * max_y * scale,
+                        ]
+                    )
+                    p_prev = np.array(
+                        [
+                            df.iloc[i - 1]["x"] + normals[i - 1][0] * max_y * scale,
+                            df.iloc[i - 1]["y"] + normals[i - 1][1] * max_y * scale,
+                        ]
+                    )
+                    d_base = np.sqrt(
+                        (df.iloc[i]["x"] - df.iloc[i - 1]["x"]) ** 2
+                        + (df.iloc[i]["y"] - df.iloc[i - 1]["y"]) ** 2
+                    )
+                    d_tip = np.sqrt(np.sum((p_curr - p_prev) ** 2))
+                    if d_tip < d_base * 0.5:
+                        new_normals[i][0] = (
+                            new_normals[i][0] + normals[i - 1][0]
+                        ) / 2.0
+                        new_normals[i][1] = (
+                            new_normals[i][1] + normals[i - 1][1]
+                        ) / 2.0
+
+                # Re-normalize
+                mag = np.sqrt(new_normals[i][0] ** 2 + new_normals[i][1] ** 2)
+                if mag > 0:
+                    new_normals[i][0] /= mag
+                    new_normals[i][1] /= mag
+            normals = new_normals
 
     reserved = {"number", "x", "y", "z", "normals"}
     cp_cols = [c for c in df.columns if c.lower() not in reserved]
