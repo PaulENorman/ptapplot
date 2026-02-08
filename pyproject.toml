@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ptapplot"
+version = "0.1.0"
+description = "A tool for plotting pressure tap data"
+dependencies = [
+    "plotly",
+    "numpy",
+    "scipy",
+    "pandas",
+    "pillow",
+    "numpy-stl",
+    "ruff",
+    "pyright"
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "C90", "B"]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.10"
+
+[tool.setuptools]
+packages = ["ptapplot"]
