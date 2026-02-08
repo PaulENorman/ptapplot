@@ -43,6 +43,7 @@ def complete_json(json_path, sort_dir="x"):
     df = df.sort_values(by=sort_dir).reset_index(drop=True)
 
     # Calculate geometric normals based on adjacent tap targets
+    flip = config.get("normals_flip", False)
     normals = []
     for i in range(len(df)):
         # Select neighbors based on position in the sequence
@@ -56,7 +57,7 @@ def complete_json(json_path, sort_dir="x"):
         # Vector along the surface (dx, dy)
         dx, dy = p2["x"] - p1["x"], p2["y"] - p1["y"]
         # Rotate 90 degrees outward to get the normal
-        nx, ny = dy, -dx
+        nx, ny = (dy, -dx) if not flip else (-dy, dx)
         norm = np.sqrt(nx**2 + ny**2)
         normals.append(
             [float(nx / norm), float(ny / norm), 0.0] if norm > 0 else [0.0, 1.0, 0.0]

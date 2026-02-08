@@ -386,6 +386,7 @@
       205
     ]
   ],
+  "normals_flip": false,
   "cp_scale": 150.0,
   "y_range": [
     0.0,

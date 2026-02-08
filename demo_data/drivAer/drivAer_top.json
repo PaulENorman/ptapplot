@@ -64,6 +64,7 @@
     }
   ],
   "line_breaks": [[203, 197], [204, 205]], # Pairs of tap IDs where the plot line should be disconnected
+  "normals_flip": false, # Toggle to reverse the direction of all surface normals
   "cp_scale": 150.0, # Length of the local Cp axis (pixels per unit Cp)
   "y_range": [0.0, 1.2], # Range of Cp values to display on local axes
   "num_ticks": 4, # Number of tick marks on each needle

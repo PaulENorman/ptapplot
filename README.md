@@ -1,16 +1,10 @@
 # ptapplot
 A python library for making pressure tap plots
 
+*Click the image to view an interactive Plotly*
+
 [![DrivAer Pressure Distribution](demo_data/drivAer/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer/drivAer_multi_series.html)
 
-*Click the image above to view the interactive Plotly plot.*
-
-## Features
-- **Self-Contained Config**: Embed CSV data directly in the JSON configuration using `#` Python-style comments.
-- **Auto-Mapping**: Automatic physical-to-pixel coordinate mapping with image content detection (bounds detection).
-- **Multi-Series Support**: Plot multiple data columns with custom colors, line styles, and markers.
-- **Normal Relaxation**: Geometric Laplacian smoothing and uncrossing of local $C_p$ axes for complex surfaces.
-- **Line Breaks**: Disconnect plot lines between specific tap pairs (e.g., across gaps or body segments).
 
 ## Usage Flow
 1. **Source Configuration**: Define your vehicle image, physical extents, and CSV tap data in a `.json` file.
@@ -48,6 +42,7 @@ The source `.json` supports Python-style `#` comments and the following keys:
 - `taps`: Array of CSV-formatted strings (header: `number,x,y,z,Case1,Case2...`).
 - `extents`: Physical bounding box of the vehicle (`x_min`, `x_max`, etc.).
 - `line_breaks`: List of tap-number pairs `[ID1, ID2]` to disconnect the plot line between.
+- `normals_flip`: (bool) Reverses the direction of all calculated surface normals (useful if plots are appearing "inside" the vehicle).
 - `cp_scale`: Scaling factor for the local $C_p$ axes (pixels per unit $C_p$).
 - `series_preferences`: Array of style objects (keys: `line_color`, `line_width`, `line_dash`, `show_markers`, `marker_symbol`).
 
