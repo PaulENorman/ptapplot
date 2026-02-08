@@ -1,12 +1,15 @@
 # ptapplot
 A python library for making pressure tap plots
 
-*Click the image to view an interactive Plotly*
+*Click the images to view interactive Plotly visualizations*
 
-[![DrivAer Pressure Distribution](demo_data/drivAer/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer/drivAer_multi_series.html)
-
+| 2D Needle Plot | 3D Dot Plot |
+| :---: | :---: |
+| [![DrivAer 2D](demo_data/drivAer_lineplot/drivAer_multi_series.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_lineplot/drivAer_multi_series.html) | [![DrivAer 3D](demo_data/drivAer_dotplot/drivAer_dotplot_preview.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_dotplot/drivAer_dotplot.html) |
 
 ## Usage Flow
+
+### 2D Line Plots (Needles)
 1. **Source Configuration**: Define your vehicle image, physical extents, and CSV tap data in a `.json` file.
 2. **Preprocessing**: Run `generate_json_normals.py` to calculate surface normals and prepare the data.
 3. **Rendering**: Run `wrap_ptap_plot.py` to generate the interactive HTML Plotly visualization.
@@ -19,6 +22,10 @@ graph LR
     D --> E[plot_output.html]
 ```
 
+### 3D Dot Plots (Geometry Overlay)
+1. **Source Configuration**: Define paths to your STL geometry, tap positions, and results CSVs in a `.json` file.
+2. **Rendering**: Run `dot_plot.py` to generate a 3D Plotly scene. Supports side-by-side comparison with synced cameras.
+
 ### Installation
 ```bash
 pip install -r requirements.txt
@@ -26,12 +33,24 @@ pip install -r requirements.txt
 
 ### Quick Start
 ```bash
-# 1. Prepare configuration (Calculate surface normals)
-python generate_json_normals.py demo_data/drivAer/drivAer_top.json
+# 2D Needle Plot
+python generate_json_normals.py demo_data/drivAer_lineplot/drivAer_top.json
+python wrap_ptap_plot.py demo_data/drivAer_lineplot/drivAer_top_complete.json
 
-# 2. Render plot
-python wrap_ptap_plot.py demo_data/drivAer/drivAer_top_complete.json
+# 3D Dot Plot
+python dot_plot.py demo_data/drivAer_dotplot/dotplot_config.json
 ```
+
+## Advanced Features
+
+### 3D Dot Plot Configuration
+The `dotplot_config.json` supports several visualization overrides:
+- `mesh_opacity`: Transparency of the vehicle geometry.
+- `scale_by_value`: (bool) Dynamically size dots based on $C_p$ magnitude.
+- `offset`: (float) Lift dots off the STL surface to prevent z-fighting clipping.
+- `camera`: Initial eye, center, and up vectors for the 3D scene.
+
+### JSON Configuration Options (2D)
 
 ## Advanced Features
 

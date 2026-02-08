@@ -131,7 +131,12 @@ def complete_json(json_path, sort_dir="x"):
     reserved = {"number", "x", "y", "z", "normals"}
     cp_cols = [c for c in df.columns if c.lower() not in reserved]
 
-    config["normals"] = normals
+    # Convert normals list to a dictionary keyed by tap number
+    normals_map = {}
+    for idx, row in df.iterrows():
+        normals_map[str(int(row["number"]))] = normals[idx]
+
+    config["normals"] = normals_map
 
     # If the input was a list of strings (CSV), let's keep it that way
     if (

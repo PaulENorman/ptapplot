@@ -83,8 +83,14 @@ def render_plot(json_path):
         df["n"] = (
             df["number"].astype(int) if "number" in df else np.arange(1, len(df) + 1)
         )
-        df["nx"] = [n[0] for n in normals]
-        df["ny"] = [n[1] for n in normals]
+
+        # Handle normals as either a list or a dictionary keyed by tap number
+        if isinstance(normals, dict):
+            df["nx"] = [normals[str(int(n))][0] for n in df["n"]]
+            df["ny"] = [normals[str(int(n))][1] for n in df["n"]]
+        else:
+            df["nx"] = [n[0] for n in normals]
+            df["ny"] = [n[1] for n in normals]
 
         # Extract Cp columns (non-reserved)
         reserved = {"number", "x", "y", "z", "normals", "n", "nx", "ny"}
