@@ -1,6 +1,6 @@
 {
-  "image_path": "drivAer_top.png",
-  "taps": [
+  "image_path": "drivAer_top.png", // Path to the vehicle image
+  "taps": [ // CSV-formatted string array of tap locations and pressure coefficients
     "number,x,y,z,Case 2a,Case 2b",
     "1,-798.25,0.0,150,0.368,0.401",
     "24,-793.1,-200.0,150,0.126,0.155",
@@ -32,7 +32,7 @@
     "43,3791.3,-200.0,150,0.928,0.900",
     "193,3799.3,0.0,150,0.950,0.920"
   ],
-  "extents": {
+  "extents": { // Physical coordinate dimensions of the car model
     "x_min": -807.848876953125,
     "x_max": 3804.95458984375,
     "y_min": -1014.9907836914062,
@@ -40,13 +40,13 @@
     "z_min": -319.63897705078125,
     "z_max": 1102.471923828125
   },
-  "camera": {
+  "camera": { // Projection settings (future-proofing for 3D)
     "look_at": [0, 0, -1],
     "up": [0, 1, 0]
   },
-  "series_names": [],
-  "line_breaks": [[203, 197], [204, 205]],
-  "cp_scale": 150.0,
-  "y_range": [0.0, 1.2],
-  "num_ticks": 4
+  "series_names": [], // Optional override for legend names (defaults to CSV headers)
+  "line_breaks": [[203, 197], [204, 205]], // Pairs of tap IDs where the plot line should be disconnected
+  "cp_scale": 150.0, // Length of the local Cp axis (pixels per unit Cp)
+  "y_range": [0.0, 1.2], // Range of Cp values to display on local axes
+  "num_ticks": 4 // Number of tick marks on each needle
 }

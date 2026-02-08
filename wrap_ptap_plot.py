@@ -8,12 +8,19 @@ from PIL import Image
 
 
 def get_image_bbox(image_path):
+    """
+    Detects the bounding box of the non-white/non-transparent content in an image.
+    This is used to map physical coordinates to the actual car boundaries
+    rather than the full image canvas.
+    """
     img = Image.open(image_path).convert("RGBA")
     data = np.array(img)
-    is_not_white = ~(
-        (data[:, :, 0] > 250) & (data[:, :, 1] > 250) & (data[:, :, 2] > 250)
-    )
-    rows, cols = np.any(is_not_white, axis=1), np.any(is_not_white, axis=0)
+    # Check for non-white and non-transparent pixels
+    is_content = (
+        (data[:, :, 0] < 250) | (data[:, :, 1] < 250) | (data[:, :, 2] < 250)
+    ) & (data[:, :, 3] > 10)
+
+    rows, cols = np.any(is_content, axis=1), np.any(is_content, axis=0)
     if not np.any(rows):
         return 0, 0, img.width, img.height
     return (
@@ -25,6 +32,11 @@ def get_image_bbox(image_path):
 
 
 def render_plot(json_path):
+    """
+    Main rendering function. Reads the augmented JSON configuration,
+    maps physical coordinates to image pixel space, and generates
+    an interactive Plotly figure with local pressure axes (needles).
+    """
     with open(json_path, "r") as f:
         config = json.load(f)
     img = Image.open(os.path.join(os.path.dirname(json_path), config["image_path"]))
@@ -192,11 +204,29 @@ def render_plot(json_path):
             showlegend=False,
         )
     )
-    fig.update_xaxes(showgrid=False, zeroline=False).update_yaxes(
-        showgrid=False, zeroline=False, scaleanchor="x", scaleratio=1
+
+    # Determine plot bounds to prevent clipping and remove excess white space
+    # We want to see the car (pxmin, pymin to pxmax, pymax) and the needles
+    all_px = nx + tx + [pxmin, pxmax]
+    all_py = ny + ty + [h - pymin, h - pymax]
+    valid_px = [p for p in all_px if p is not None]
+    valid_py = [p for p in all_py if p is not None]
+
+    x_min, x_max = min(valid_px), max(valid_px)
+    y_min, y_max = min(valid_py), max(valid_py)
+    pad = 50
+
+    fig.update_xaxes(range=[x_min - pad, x_max + pad], showgrid=False, zeroline=False)
+    fig.update_yaxes(
+        range=[y_min - pad, y_max + pad],
+        showgrid=False,
+        zeroline=False,
+        scaleanchor="x",
+        scaleratio=1,
     )
+
     fig.update_layout(
-        margin=dict(l=0, r=0, t=0, b=0),
+        margin=dict(l=20, r=20, t=50, b=20),
         paper_bgcolor="white",
         plot_bgcolor="white",
         showlegend=True,

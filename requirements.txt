@@ -1,0 +1,8 @@
+plotly
+numpy
+pandas
+pillow
+scipy
+numpy-stl
+ruff
+pyright
