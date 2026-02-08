@@ -4,5 +4,6 @@ pandas
 pillow
 scipy
 numpy-stl
+kaleido
 ruff
 pyright

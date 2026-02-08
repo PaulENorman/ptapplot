@@ -10,7 +10,7 @@ except ImportError:
     from utils import load_config_json, parse_taps_dataframe
 
 
-def complete_json(json_path, sort_dir="x"):
+def complete_json(json_path, sort_dir=None):
     """
     Augments a pressure tap configuration JSON with geometric normals and
     flattens table data for the renderer.
@@ -30,10 +30,16 @@ def complete_json(json_path, sort_dir="x"):
         )
 
     df = parse_taps_dataframe(taps_source, base_dir)
-    df = df.sort_values(by=sort_dir).reset_index(drop=True)
+    if sort_dir and sort_dir in df.columns:
+        print(f"Sorting taps by {sort_dir}...")
+        df = df.sort_values(by=sort_dir).reset_index(drop=True)
 
     # Calculate geometric normals based on adjacent tap targets
     flip = config.get("normals_flip", False)
+    ext = config.get("extents", {"x_min": 0, "x_max": 1, "y_min": 0, "y_max": 1})
+    center_x = (ext["x_min"] + ext["x_max"]) / 2.0
+    center_y = (ext["y_min"] + ext["y_max"]) / 2.0
+
     normals = []
     for i in range(len(df)):
         # Select neighbors based on position in the sequence
@@ -46,8 +52,15 @@ def complete_json(json_path, sort_dir="x"):
         )
         # Vector along the surface (dx, dy)
         dx, dy = p2["x"] - p1["x"], p2["y"] - p1["y"]
-        # Rotate 90 degrees outward to get the normal
+        # Rotate 90 degrees to get a candidate normal
         nx, ny = (dy, -dx) if not flip else (-dy, dx)
+
+        # Heuristic: Ensure the normal points AWAY from the center of the bounding box
+        # This ensures the 'Cp axis' extrudes outward from the car body.
+        vec_from_center = [df.iloc[i]["x"] - center_x, df.iloc[i]["y"] - center_y]
+        if (nx * vec_from_center[0] + ny * vec_from_center[1]) < 0:
+            nx, ny = -nx, -ny
+
         norm = np.sqrt(nx**2 + ny**2)
         normals.append(
             [float(nx / norm), float(ny / norm), 0.0] if norm > 0 else [0.0, 1.0, 0.0]
@@ -176,8 +189,8 @@ def main():
     parser.add_argument(
         "--sort",
         type=str,
-        default="x",
-        help="Coordinate column to sort taps by (default: x).",
+        default=None,
+        help="Coordinate column to sort taps by (default: None - preserves original order).",
     )
     args = parser.parse_args()
 

@@ -70,6 +70,7 @@ def generate_dot_plot(config_path):
     n_cases = len(cases)
     settings = config["dot_settings"]
     opacity = settings.get("mesh_opacity", 0.3)
+    mesh_color = settings.get("mesh_color", "lightgrey")
     offset_dist = settings.get("offset", 0.0)
     cam = config["camera"]
 
@@ -107,7 +108,7 @@ def generate_dot_plot(config_path):
             i=mi,
             j=mj,
             k=mk,
-            color="lightgrey",
+            color=mesh_color,
             opacity=opacity,
             name="Geometry",
             hoverinfo="skip",
@@ -198,6 +199,14 @@ def generate_dot_plot(config_path):
         f.write(html_content)
 
     print(f"Generated 3D plot with synced cameras: {output_path}")
+
+    # Export PNG automatically
+    png_path = output_path.with_suffix(".png")
+    try:
+        fig.write_image(png_path, width=1920, height=1080, scale=2)
+        print(f"Saved: {png_path}")
+    except Exception as e:
+        print(f"PNG export failed (install kaleido: pip install kaleido): {e}")
 
 
 def main():

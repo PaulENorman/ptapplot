@@ -3,29 +3,30 @@
   "tap_positions": "pressure_tap_positions.csv", # CSV file with tap coordinates [number, x, y, z]
   "cases": [ # List of data cases to compare side-by-side
     {
-      "name": "Case A - Standard", # Display name for the first subplot
-      "data_path": "case_a_results.csv" # Path to Cp results for Case A
+      "name": "Case 2a", # Display name for the first subplot
+      "data_path": "case_2a_results.csv" # Path to Cp results for Case A
     },
     {
-      "name": "Case B - Modified", # Display name for the second subplot
-      "data_path": "case_b_results.csv" # Path to Cp results for Case B
+      "name": "Case 2b", # Display name for the second subplot
+      "data_path": "case_2b_results.csv" # Path to Cp results for Case B
     }
   ],
   "dot_settings": { # Visual configuration for the pressure dots
     "size": 5, # Constant dot size (used if scale_by_value is false)
     "colorscale": "RdBu", # Color map (e.g., RdBu, Viridis, Jet)
-    "cmin": -1.0, # Minimum Cp value for the 0% color scale
-    "cmax": 1.0, # Maximum Cp value for the 100% color scale
+    "cmin": -1, # Minimum Cp value for the 0% color scale
+    "cmax": 1, # Maximum Cp value for the 100% color scale
     "reversescale": true, # Flip the color scale (standard for pressure plots)
+    "mesh_color": "darkgrey", # Color of the vehicle geometry
     "mesh_opacity": 0.5, # Transparency of the vehicle geometry (0.0 to 1.0)
-    "scale_by_value": true, # Adjust dot size based on absolute Cp magnitude
-    "scale_factor": 15.0, # Multiplier for the magnitude scaling
-    "offset": 2.0, # Distance (mm) to lift dots off the surface to prevent clipping
-    "line_color": "darkgrey", # Color of the dot border
+    "scale_by_value": false, # Adjust dot size based on absolute Cp magnitude
+    "scale_factor": 15, # Multiplier for the magnitude scaling
+    "offset": 5.0, # Distance (mm) to lift dots off the surface to prevent clipping
+    "line_color": "black", # Color of the dot border
     "line_width": 1.0 # Thickness of the dot border
   },
   "camera": { # Initial 3D view perspective
-    "eye": {"x": 1.5, "y": 1.5, "z": 1.5}, # Camera position
+    "eye": {"x": 1.5, "y": -1.5, "z": 1.5}, # Camera position
     "center": {"x": 0, "y": 0, "z": 0}, # Look-at point
     "up": {"x": 0, "y": 0, "z": 1} # Up vector
   },
