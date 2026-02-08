@@ -1,0 +1,14 @@
+LICENSE
+README.md
+pyproject.toml
+src/ptapplot/__init__.py
+src/ptapplot/dot_plot.py
+src/ptapplot/generate_json_normals.py
+src/ptapplot/utils.py
+src/ptapplot/wrap_ptap_plot.py
+src/ptapplot.egg-info/PKG-INFO
+src/ptapplot.egg-info/SOURCES.txt
+src/ptapplot.egg-info/dependency_links.txt
+src/ptapplot.egg-info/entry_points.txt
+src/ptapplot.egg-info/requires.txt
+src/ptapplot.egg-info/top_level.txt

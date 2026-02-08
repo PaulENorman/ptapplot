@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: ptapplot
+Version: 0.1.0
+Summary: A python library for making pressure tap plots
+License-File: LICENSE
+Requires-Dist: plotly
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: pandas
+Requires-Dist: pillow
+Requires-Dist: numpy-stl
+Dynamic: license-file

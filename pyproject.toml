@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ptapplot"
 version = "0.1.0"
-description = "A tool for plotting pressure tap data"
+description = "A python library for making pressure tap plots"
 dependencies = [
     "plotly",
     "numpy",
@@ -13,20 +13,23 @@ dependencies = [
     "pandas",
     "pillow",
     "numpy-stl",
-    "ruff",
-    "pyright"
 ]
+
+[project.scripts]
+ptap-2d-prep = "ptapplot.generate_json_normals:main"
+ptap-2d-plot = "ptapplot.wrap_ptap_plot:main"
+ptap-3d-plot = "ptapplot.dot_plot:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "C90", "B"]
 
 [tool.pyright]
 typeCheckingMode = "basic"
-pythonVersion = "3.10"
-
-[tool.setuptools]
-packages = ["ptapplot"]
+pythonVersion = "3.9"
