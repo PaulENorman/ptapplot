@@ -3,7 +3,9 @@ import json
 import re
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
+from PIL import Image
 
 
 def load_config_json(json_path):
@@ -17,6 +19,30 @@ def load_config_json(json_path):
         # Remove # style comments
         content = re.sub(r"#.*", "", content)
         return json.loads(content)
+
+
+def get_image_bbox(image_path):
+    """
+    Detects the bounding box of the non-white/non-transparent content in an image.
+    Used to map physical coordinates to actual vehicle boundaries in the image.
+
+    Returns (x_min, y_min, x_max, y_max) in pixel coordinates.
+    """
+    img = Image.open(image_path).convert("RGBA")
+    data = np.array(img)
+    is_content = (
+        (data[:, :, 0] < 250) | (data[:, :, 1] < 250) | (data[:, :, 2] < 250)
+    ) & (data[:, :, 3] > 10)
+
+    rows, cols = np.any(is_content, axis=1), np.any(is_content, axis=0)
+    if not np.any(rows):
+        return 0, 0, img.width, img.height
+    return (
+        np.where(cols)[0][0],
+        np.where(rows)[0][0],
+        np.where(cols)[0][-1],
+        np.where(rows)[0][-1],
+    )
 
 
 def parse_taps_dataframe(taps_input, base_dir):

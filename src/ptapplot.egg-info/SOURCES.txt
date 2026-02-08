@@ -4,6 +4,7 @@ pyproject.toml
 src/ptapplot/__init__.py
 src/ptapplot/dot_plot.py
 src/ptapplot/generate_json_normals.py
+src/ptapplot/needle_plot.py
 src/ptapplot/utils.py
 src/ptapplot/wrap_ptap_plot.py
 src/ptapplot.egg-info/PKG-INFO

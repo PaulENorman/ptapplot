@@ -9,4 +9,5 @@ Requires-Dist: scipy
 Requires-Dist: pandas
 Requires-Dist: pillow
 Requires-Dist: numpy-stl
+Requires-Dist: kaleido
 Dynamic: license-file

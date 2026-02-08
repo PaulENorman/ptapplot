@@ -20,6 +20,7 @@ dependencies = [
 ptap-2d-prep = "ptapplot.generate_json_normals:main"
 ptap-2d-plot = "ptapplot.wrap_ptap_plot:main"
 ptap-3d-plot = "ptapplot.dot_plot:main"
+ptap-needle-plot = "ptapplot.needle_plot:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

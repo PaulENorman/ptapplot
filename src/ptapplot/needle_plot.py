@@ -1,3 +1,10 @@
+"""Needle Plot: 2D pressure tap visualization with individual Cp needles.
+
+Unlike the Line Plot which connects Cp values with a continuous line, this plot
+draws individual "needle" bars from the vehicle surface to each Cp value.
+Needles extrude along surface normals with positive Cp pointing inward.
+"""
+
 import argparse
 from pathlib import Path
 
@@ -13,10 +20,10 @@ except ImportError:
     from utils import get_image_bbox, load_config_json, parse_taps_dataframe
 
 
-def render_plot(json_path):
+def render_needle_plot(json_path):
     """
-    Main rendering function. Preserves the 'Original Look' with needle ticks and labels
-    while integrating with the modernized project structure.
+    Renders a needle plot with individual Cp needles extruding along surface normals.
+    Each tap gets its own needle from surface to Cp value (no connecting lines).
     """
     json_path = Path(json_path)
     config = load_config_json(json_path)
@@ -26,7 +33,6 @@ def render_plot(json_path):
     if "normals" not in config:
         print("Normals missing from config. Running preprocessor automatically...")
         complete_json(json_path)
-        # Reload to ensure we have the absolute state
         config = load_config_json(
             json_path.with_name(f"{json_path.stem}_complete.json")
         )
@@ -43,7 +49,7 @@ def render_plot(json_path):
     taps_input = config.get("taps")
     df = parse_taps_dataframe(taps_input, base_dir)
 
-    # Map geometric normals and CP data
+    # Map geometric normals from config
     normals_map = config["normals"]
     df["nx"] = df["number"].apply(lambda n: normals_map[str(int(n))][0])
     df["ny"] = df["number"].apply(lambda n: normals_map[str(int(n))][1])
@@ -80,35 +86,37 @@ def render_plot(json_path):
         )
     )
 
-    # --- Local Cp Axes: Lines along surface normals at each tap ---
-    # The axis starts at the tap location (representing ymin_ax) and extends
-    # OUTWARD ONLY (along the normal) to represent ymax_ax.
-    # The range of the axis is (ymax_ax - ymin_ax).
+    # --- Needle Axes: Lines along surface normals at each tap ---
+    # Axis is centered at Cp=0 (surface), extending both directions
+    # Positive Cp goes IN (opposite to normal), negative goes OUT (along normal)
     nx, ny, tx, ty = [], [], [], []
-    axis_range = ymax_ax - ymin_ax
     tick_vals = np.linspace(ymin_ax, ymax_ax, config.get("num_ticks", 2))
     for i, r in df.iterrows():
-        # Needle spine: starts at tap (offset=0), extends to axis_range * scale
+        # Needle spine: from ymin_ax to ymax_ax, centered at surface (Cp=0)
+        # Positive Cp = opposite normal direction (inward)
+        # Negative Cp = along normal direction (outward)
         nx.extend(
             [
-                r["xi"],
-                r["xi"] + axis_range * scale * r["nux"],
+                r["xi"]
+                - ymin_ax * scale * r["nux"],  # ymin_ax is negative, goes outward
+                r["xi"]
+                - ymax_ax * scale * r["nux"],  # ymax_ax is positive, goes inward
                 None,
             ]
         )
         ny.extend(
             [
-                h - r["yi"],
-                h - (r["yi"] + axis_range * scale * r["nuy"]),
+                h - (r["yi"] - ymin_ax * scale * r["nuy"]),
+                h - (r["yi"] - ymax_ax * scale * r["nuy"]),
                 None,
             ]
         )
 
-        # Tick marks: placed at (v - ymin_ax) offset from tap
+        # Tick marks: placed at -v offset from tap (negative to invert)
         for v in tick_vals:
-            px, py = r["nuy"], r["nux"]
+            px, py = r["nuy"], r["nux"]  # Perpendicular to needle
             tick_len = 5
-            offset = (v - ymin_ax) * scale
+            offset = -v * scale
             cx, cy = (
                 r["xi"] + offset * r["nux"],
                 h - (r["yi"] + offset * r["nuy"]),
@@ -119,8 +127,8 @@ def render_plot(json_path):
             # Axis labels (every 5th needle for clarity)
             if i % 5 == 0 or i == len(df) - 1:
                 fig.add_annotation(
-                    x=r["xi"] + offset * r["nux"],
-                    y=h - (r["yi"] + offset * r["nuy"]),
+                    x=r["xi"] - v * scale * r["nux"],
+                    y=h - (r["yi"] - v * scale * r["nuy"]),
                     text=f"{v:.1f}",
                     showarrow=False,
                     font=dict(size=8, color="grey"),
@@ -148,44 +156,9 @@ def render_plot(json_path):
         )
     )
 
-    # --- Horizontal Gridlines: Connect ticks across needles ---
-    # Determine the "central" value (midpoint of the axis range, like x=0 on a normal plot)
-    # Respect line_breaks defined in the JSON
-    breaks = [set(b) for b in config.get("line_breaks", [])]
-    central_val = (ymin_ax + ymax_ax) / 2.0
-    for v in tick_vals:
-        gx, gy = [], []
-        for idx in range(len(df)):
-            r = df.iloc[idx]
-            offset = (v - ymin_ax) * scale
-            gx.append(r["xi"] + offset * r["nux"])
-            gy.append(h - (r["yi"] + offset * r["nuy"]))
+    # No gridlines for needle plot (unlike line plot)
 
-            # Insert None to break the line at line_breaks
-            if idx < len(df) - 1:
-                t1, t2 = int(df.iloc[idx]["number"]), int(df.iloc[idx + 1]["number"])
-                if {t1, t2} in breaks:
-                    gx.append(None)
-                    gy.append(None)
-
-        # Darker grey for central value, light grey dotted for others
-        if abs(v - central_val) < 1e-6:
-            line_style = dict(color="darkgrey", width=1, dash="dot")
-        else:
-            line_style = dict(color="lightgrey", width=0.5, dash="dot")
-
-        fig.add_trace(
-            go.Scatter(
-                x=gx,
-                y=gy,
-                mode="lines",
-                line=line_style,
-                hoverinfo="skip",
-                showlegend=False,
-            )
-        )
-
-    # Base surface line (CP=0)
+    # Base surface line (Cp=0)
     fig.add_trace(
         go.Scatter(
             x=df["xi"],
@@ -205,7 +178,10 @@ def render_plot(json_path):
     series_colors = config.get(
         "series_colors", ["red", "blue", "green", "purple", "orange"]
     )
-    breaks = [set(b) for b in config.get("line_breaks", [])]
+    n_series = len(cp_cols)
+    series_offset = config.get(
+        "series_offset", 8
+    )  # Perpendicular offset between series
 
     for i, col_name in enumerate(cp_cols):
         name = series_names[i] if i < len(series_names) else col_name
@@ -222,47 +198,49 @@ def render_plot(json_path):
         if i < len(series_prefs):
             pref.update(series_prefs[i])
 
-        # Displacement calculation:
-        # The axis starts at the tap (ymin_ax) and extends outward to ymax_ax.
-        # A Cp value of ymin_ax plots at the tap location (offset=0).
-        # A Cp value of ymax_ax plots at the end of the axis (offset=axis_range*scale).
-        # We map Cp to offset: offset = (cp - ymin_ax) * scale
-        cp_offsets = (cp_vals - ymin_ax) * scale
-        xp = df["xi"] + cp_offsets * df["nux"]
-        yp = h - (df["yi"] + cp_offsets * df["nuy"])
-
-        # Handle line breaks for multi-segment cars
-        x_plot, y_plot, cp_plot, tap_plot = [], [], [], []
+        # Each needle is a line from surface (Cp=0) to the Cp value along the normal
+        # Positive Cp = opposite normal (inward), Negative Cp = along normal (outward)
+        # Apply perpendicular offset so series don't overlap
+        x_needles, y_needles, cp_hover, tap_hover = [], [], [], []
         for v_idx in range(len(df)):
-            x_plot.append(xp.iloc[v_idx])
-            y_plot.append(yp.iloc[v_idx])
-            cp_plot.append(cp_vals[v_idx])
-            tap_plot.append(df["number"].iloc[v_idx])
+            r = df.iloc[v_idx]
 
-            if v_idx < len(df) - 1:
-                t1, t2 = (
-                    int(df["number"].iloc[v_idx]),
-                    int(df["number"].iloc[v_idx + 1]),
-                )
-                if {t1, t2} in breaks:
-                    for arr in [x_plot, y_plot, cp_plot, tap_plot]:
-                        arr.append(None)
+            # Perpendicular offset to separate series
+            # Perp vector: (nuy, nux) in plot space
+            perp_x, perp_y = r["nuy"], r["nux"]
+            # Center the series around the tap, offset by series index
+            offset_amount = (i - (n_series - 1) / 2.0) * series_offset
+            base_x = r["xi"] + offset_amount * perp_x
+            base_y = h - r["yi"] - offset_amount * perp_y
+
+            # Cp offset along normal direction (negative = inward for positive Cp)
+            cp_offset = -cp_vals[v_idx] * scale
+            xi_cp = base_x + cp_offset * r["nux"]
+            yi_cp = base_y - cp_offset * r["nuy"]
+
+            # Draw line from surface to Cp value along normal
+            x_needles.extend([base_x, xi_cp, None])
+            y_needles.extend([base_y, yi_cp, None])
+            cp_hover.extend([cp_vals[v_idx], cp_vals[v_idx], None])
+            tap_hover.extend([r["number"], r["number"], None])
 
         fig.add_trace(
             go.Scatter(
-                x=x_plot,
-                y=y_plot,
-                mode="lines+markers" if pref["show_markers"] else "lines",
+                x=x_needles,
+                y=y_needles,
+                mode="lines",
                 name=name,
                 line=dict(
                     color=pref["line_color"],
                     width=pref["line_width"],
                     dash=pref["line_dash"],
                 ),
-                marker=dict(size=pref["marker_size"], symbol=pref["marker_symbol"]),
-                text=cp_plot,
-                customdata=tap_plot,
-                hovertemplate=f"<b>{name}</b><br>Tap: %{{customdata}}<br>Cp: %{{text:.3f}}<extra></extra>",
+                text=cp_hover,
+                customdata=tap_hover,
+                hovertemplate=(
+                    f"<b>{name}</b><br>Tap: %{{customdata}}<br>"
+                    "Cp: %{text:.3f}<extra></extra>"
+                ),
             )
         )
 
@@ -302,10 +280,10 @@ def render_plot(json_path):
         template="plotly_white",
         margin=dict(l=0, r=0, b=0, t=40),
         legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-        title=f"Line Plot: {json_path.name}",
+        title=f"Needle Plot: {json_path.name}",
     )
 
-    out_file = base_dir / config.get("output_path", "plot_output.html")
+    out_file = base_dir / config.get("output_path", "needleplot_output.html")
     fig.write_html(out_file, include_plotlyjs="cdn")
     print(f"Saved: {out_file}")
 
@@ -320,19 +298,19 @@ def render_plot(json_path):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Render a 2D pressure tap line plot with local Cp axes following surface normals."
+        description="Render a 2D needle plot with Cp bars along normals."
     )
     parser.add_argument(
         "config",
         type=str,
         nargs="?",
-        default="demo_data/drivAer_lineplot/drivAer_top.json",
+        default="demo_data/drivAer_needleplot/needleplot_config.json",
         help="Path to the source JSON configuration file.",
     )
     args = parser.parse_args()
 
     if Path(args.config).exists():
-        render_plot(args.config)
+        render_needle_plot(args.config)
     else:
         print(f"Error: Configuration file not found at {args.config}")
 
