@@ -35,8 +35,8 @@
   "extents": { # Physical coordinate dimensions of the car model
     "x_min": -807.848876953125,
     "x_max": 3804.95458984375,
-    "y_min": -1014.9907836914062,
-    "y_max": 1014.9907836914062,
+    "y_min": -910.02,
+    "y_max": 910.02,
     "z_min": -319.63897705078125,
     "z_max": 1102.471923828125
   },

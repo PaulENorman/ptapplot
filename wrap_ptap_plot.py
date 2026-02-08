@@ -1,3 +1,4 @@
+import io
 import json
 import os
 
@@ -53,16 +54,43 @@ def render_plot(json_path):
     ext = config["extents"]
     fx, fy = pw / (ext["x_max"] - ext["x_min"]), ph / (ext["y_max"] - ext["y_min"])
 
-    taps = config["taps"]
-    df = pd.DataFrame(
-        {
-            "n": taps["number"],
-            "x": taps["x"],
-            "y": taps["y"],
-            "nx": [n[0] for n in taps["normals"]],
-            "ny": [n[1] for n in taps["normals"]],
-        }
-    )
+    taps_input = config["taps"]
+    if isinstance(taps_input, dict) and "number" in taps_input:
+        # Backward compatibility for the flattened format
+        df = pd.DataFrame(
+            {
+                "n": taps_input["number"],
+                "x": taps_input["x"],
+                "y": taps_input["y"],
+                "nx": [n[0] for n in taps_input["normals"]],
+                "ny": [n[1] for n in taps_input["normals"]],
+            }
+        )
+        cp_data = taps_input["Cp"]
+    else:
+        # New "original-like" format or direct loading from original source
+        if isinstance(taps_input, str):
+            df = pd.read_csv(io.StringIO(taps_input))
+        elif isinstance(taps_input, list):
+            if len(taps_input) > 0 and isinstance(taps_input[0], str):
+                df = pd.read_csv(io.StringIO("\n".join(taps_input)))
+            else:
+                df = pd.DataFrame(taps_input)
+        else:
+            raise ValueError("Invalid taps format.")
+
+        normals = config["normals"]
+        df["n"] = (
+            df["number"].astype(int) if "number" in df else np.arange(1, len(df) + 1)
+        )
+        df["nx"] = [n[0] for n in normals]
+        df["ny"] = [n[1] for n in normals]
+
+        # Extract Cp columns (non-reserved)
+        reserved = {"number", "x", "y", "z", "normals", "n", "nx", "ny"}
+        cp_cols = [c for c in df.columns if c.lower() not in reserved]
+        cp_data = [df[c].tolist() for c in cp_cols]
+
     df["xi"] = pxmin + (df["x"] - ext["x_min"]) * fx
     df["yi"] = (
         pymin + (1.0 - (df["y"] - ext["y_min"]) / (ext["y_max"] - ext["y_min"])) * ph
@@ -167,7 +195,7 @@ def render_plot(json_path):
     series_names = config.get("series_names", [])
     series_prefs = config.get("series_preferences", [])
     breaks = [set(b) for b in config.get("line_breaks", [])]
-    for i, cp in enumerate(taps["Cp"]):
+    for i, cp in enumerate(cp_data):
         name = series_names[i] if i < len(series_names) else f"Case {i + 1}"
 
         # Default preferences

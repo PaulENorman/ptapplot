@@ -131,16 +131,19 @@ def complete_json(json_path, sort_dir="x"):
     reserved = {"number", "x", "y", "z", "normals"}
     cp_cols = [c for c in df.columns if c.lower() not in reserved]
 
-    config["taps"] = {
-        "number": df["number"].astype(int).tolist()
-        if "number" in df
-        else list(range(1, len(df) + 1)),
-        "x": df["x"].tolist(),
-        "y": df["y"].tolist(),
-        "z": df["z"].tolist() if "z" in df else [0.0] * len(df),
-        "normals": normals,
-        "Cp": [df[c].tolist() for c in cp_cols] if cp_cols else [[0.0] * len(df)],
-    }
+    config["normals"] = normals
+
+    # If the input was a list of strings (CSV), let's keep it that way
+    if (
+        isinstance(taps_input, list)
+        and len(taps_input) > 0
+        and isinstance(taps_input[0], str)
+    ):
+        config["taps"] = df.to_csv(index=False).strip().split("\n")
+    elif isinstance(taps_input, list):
+        config["taps"] = df.to_dict("records")
+    elif isinstance(taps_input, str):
+        config["taps"] = df.to_csv(index=False).strip()
 
     defaults = {
         "cp_scale": 100.0,
