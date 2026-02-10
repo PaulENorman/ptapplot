@@ -87,6 +87,16 @@ def render_plot(json_path):
     nx, ny, tx, ty = [], [], [], []
     axis_range = ymax_ax - ymin_ax
     tick_vals = np.linspace(ymin_ax, ymax_ax, config.get("num_ticks", 2))
+
+    # Label axes only at first/last tap and at break boundaries
+    num_to_idx = {int(n): idx for idx, n in enumerate(df["number"])}
+    break_pairs = [set(b) for b in config.get("line_breaks", [])]
+    label_indices = {0, len(df) - 1}
+    for pair in break_pairs:
+        nums = list(pair)
+        for n in nums:
+            if int(n) in num_to_idx:
+                label_indices.add(num_to_idx[int(n)])
     for i, r in df.iterrows():
         # Needle spine: starts at tap (offset=0), extends to axis_range * scale
         nx.extend(
@@ -107,7 +117,7 @@ def render_plot(json_path):
         # Tick marks: placed at (v - ymin_ax) offset from tap
         for v in tick_vals:
             px, py = r["nuy"], r["nux"]
-            tick_len = 5
+            tick_len = 4
             offset = (v - ymin_ax) * scale
             cx, cy = (
                 r["xi"] + offset * r["nux"],
@@ -116,8 +126,8 @@ def render_plot(json_path):
             tx.extend([cx - px * tick_len, cx + px * tick_len, None])
             ty.extend([cy - py * tick_len, cy + py * tick_len, None])
 
-            # Axis labels (every 5th needle for clarity)
-            if i % 5 == 0 or i == len(df) - 1:
+            # Axis labels only on first/last and break boundaries
+            if i in label_indices:
                 # Calculate rotation angle (perpendicular to axis, +90 degrees)
                 angle = np.degrees(np.arctan2(-r["nuy"], r["nux"])) + 90
 
@@ -135,7 +145,19 @@ def render_plot(json_path):
 
                 # Perpendicular offset (shift text away from spine)
                 # Perp vector in Plotly space is (nuy, nux)
-                shift = 10
+                # Shift direction: segment starts go negative, ends go positive
+                prev_pair = (
+                    {int(df.iloc[i - 1]["number"]), int(r["number"])} if i > 0 else None
+                )
+                next_pair = (
+                    {int(r["number"]), int(df.iloc[i + 1]["number"])}
+                    if i < len(df) - 1
+                    else None
+                )
+                is_start = i == 0 or prev_pair in break_pairs
+                is_end = i == len(df) - 1 or next_pair in break_pairs
+                shift_dir = -1 if is_start and not is_end else 1
+                shift = 26 * shift_dir
                 spine_x = r["xi"] + offset * r["nux"]
                 spine_y = h - (r["yi"] + offset * r["nuy"])
 
