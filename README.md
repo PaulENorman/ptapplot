@@ -56,5 +56,5 @@ ptap-3d-plot demo_data/drivAer_dotplot/dotplot_config.json
 ptap-needle-plot demo_data/drivAer_needleplot/needleplot_config.json
 ```
 
-Needle plots show individual bars instead of a connected line. Positive $C_p$ (pressure) points inward toward the body, negative $C_p$ (suction) points outward. Multiple series are offset perpendicular to the normal for clarity.
+Needle plots show individual bars instead of a connected line. Positive $C_p$ (pressure) points inward toward the body, negative $C_p$ (suction) points outward. Multiple series are offset perpendicular to the normal for clarity. Note that the needles are more or less normal to the adjacent normal y-axes, not the exact surface at that point (although these are close).
 
