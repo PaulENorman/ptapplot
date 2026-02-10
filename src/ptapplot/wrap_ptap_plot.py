@@ -118,13 +118,36 @@ def render_plot(json_path):
 
             # Axis labels (every 5th needle for clarity)
             if i % 5 == 0 or i == len(df) - 1:
+                # Calculate rotation angle (perpendicular to axis, +90 degrees)
+                angle = np.degrees(np.arctan2(-r["nuy"], r["nux"])) + 90
+                
+                # Normalize angle to [-180, 180]
+                while angle > 180:
+                    angle -= 360
+                while angle <= -180:
+                    angle += 360
+
+                # Keep text upright
+                if angle > 90:
+                    angle -= 180
+                elif angle < -90:
+                    angle += 180
+
+                # Perpendicular offset (shift text away from spine)
+                # Perp vector in Plotly space is (nuy, nux)
+                shift = 10
+                spine_x = r["xi"] + offset * r["nux"]
+                spine_y = h - (r["yi"] + offset * r["nuy"])
+
                 fig.add_annotation(
-                    x=r["xi"] + offset * r["nux"],
-                    y=h - (r["yi"] + offset * r["nuy"]),
+                    x=spine_x + r["nuy"] * shift,
+                    y=spine_y + r["nux"] * shift,
                     text=f"{v:.1f}",
                     showarrow=False,
                     font=dict(size=12, color="black"),
-                    xanchor="right" if r["nux"] < 0 else "left",
+                    textangle=angle,
+                    xanchor="center",
+                    yanchor="middle",
                 )
 
     fig.add_trace(
