@@ -267,6 +267,58 @@ def render_needle_plot(json_path):
             )
         )
 
+        # Add scatter points at the end of each needle
+        x_markers, y_markers, cp_markers, tap_markers, angle_markers = (
+            [],
+            [],
+            [],
+            [],
+            [],
+        )
+        for v_idx in range(len(df)):
+            r = df.iloc[v_idx]
+            perp_x, perp_y = r["nuy"], r["nux"]
+            offset_amount = (i - (n_series - 1) / 2.0) * series_offset
+            base_x = r["xi"] + offset_amount * perp_x
+            base_y = h - r["yi"] - offset_amount * perp_y
+
+            cp_offset = -cp_vals[v_idx] * scale
+            xi_cp = base_x + cp_offset * r["nux"]
+            yi_cp = base_y - cp_offset * r["nuy"]
+
+            x_markers.append(xi_cp)
+            y_markers.append(yi_cp)
+            cp_markers.append(cp_vals[v_idx])
+            tap_markers.append(r["number"])
+
+            # Orient marker along the needle direction (base -> Cp tip)
+            # Plotly's triangle-up points along +Y by default; our plot Y grows downward, so flip dy and
+            # rotate from +X to +Y frame.
+            dx, dy = xi_cp - base_x, yi_cp - base_y
+            angle_markers.append(np.degrees(np.arctan2(-dy, dx)) + 90)
+
+        fig.add_trace(
+            go.Scatter(
+                x=x_markers,
+                y=y_markers,
+                mode="markers",
+                name=name,
+                marker=dict(
+                    color=pref["line_color"],
+                    size=pref.get("marker_size", 6) + 3,
+                    symbol="triangle-up",
+                    angle=angle_markers,
+                ),
+                text=cp_markers,
+                customdata=tap_markers,
+                hovertemplate=(
+                    f"<b>{name}</b><br>Tap: %{{customdata}}<br>"
+                    "Cp: %{text:.3f}<extra></extra>"
+                ),
+                showlegend=False,
+            )
+        )
+
     # Final Dots at Surface
     fig.add_trace(
         go.Scatter(

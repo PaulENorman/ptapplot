@@ -56,7 +56,7 @@
     {
       "line_color": "blue",
       "line_width": 2,
-      "line_dash": "dash",
+      "line_dash": "solid",
       "show_markers": true,
       "marker_size": 4,
       "marker_symbol": "square"
