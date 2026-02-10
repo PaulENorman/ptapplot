@@ -188,16 +188,35 @@ def generate_dot_plot(config_path):
     sync_script = f"""
         var gd = document.getElementById('{div_id}');
         gd.on('plotly_relayout', function(edata) {{
+            // Filter for keys that involve camera changes
             var camera_keys = Object.keys(edata).filter(k => k.includes('camera'));
+            
             if (camera_keys.length > 0 && !gd._syncing) {{
                 gd._syncing = true;
-                var cam = edata[camera_keys[0]];
-                var update = {{}};
-                for (var i = 1; i <= {n_cases}; i++) {{
-                    var sceneName = 'scene' + (i > 1 ? i : '');
-                    update[sceneName + '.camera'] = cam;
+                var key = camera_keys[0]; // e.g. "scene.camera" or "scene.camera.eye"
+                var val = edata[key];
+                
+                // Extract the suffix after the scene name (e.g. ".camera" or ".camera.eye")
+                // Matches "scene" or "scene2" etc. at the start. 
+                // We want everything after the first dot.
+                var parts = key.split('.');
+                if (parts.length > 1) {{
+                    var suffix = '.' + parts.slice(1).join('.');
+                    var update = {{}};
+                    
+                    for (var i = 1; i <= {n_cases}; i++) {{
+                        var sceneName = 'scene' + (i > 1 ? i : '');
+                        // Only update other scenes, or update all to be consistent? 
+                        // Updating all including self is fine and safer for consistency.
+                        update[sceneName + suffix] = val;
+                    }}
+                    
+                    Plotly.relayout(gd, update)
+                        .then(() => {{ gd._syncing = false; }})
+                        .catch(() => {{ gd._syncing = false; }});
+                }} else {{
+                   gd._syncing = false;
                 }}
-                Plotly.relayout(gd, update).then(() => {{ gd._syncing = false; }});
             }}
         }});
     """
