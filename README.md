@@ -9,6 +9,9 @@ A python library for making pressure tap plots
 | **2D Needle Plot** | [![DrivAer Needle](demo_data/drivAer_needleplot/drivAer_needleplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_needleplot/drivAer_needleplot.html) |
 | **3D Dot Plot** | [![DrivAer 3D](demo_data/drivAer_dotplot/drivAer_dotplot.png)](https://raw.githack.com/PaulENorman/ptapplot/main/demo_data/drivAer_dotplot/drivAer_dotplot.html) |
 
+The data for these demos was obtained from https://autocfd.org/
+
+
 ## Installation
 
 ```bash

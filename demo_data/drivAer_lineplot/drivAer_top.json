@@ -1,5 +1,6 @@
 {
   "image_path": "drivAer_top.png",
+  "output_path": "drivAer_multi_series.html",
   "taps": [
     "number,x,y,z,Case 2a,Case 2b",
     "1.0,-798.25,0.0,150.0,0.95,0.946",
