@@ -120,7 +120,7 @@ def render_plot(json_path):
             if i % 5 == 0 or i == len(df) - 1:
                 # Calculate rotation angle (perpendicular to axis, +90 degrees)
                 angle = np.degrees(np.arctan2(-r["nuy"], r["nux"])) + 90
-                
+
                 # Normalize angle to [-180, 180]
                 while angle > 180:
                     angle -= 360
