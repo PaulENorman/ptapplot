@@ -131,7 +131,7 @@ def render_needle_plot(json_path):
                     y=h - (r["yi"] - v * scale * r["nuy"]),
                     text=f"{v:.1f}",
                     showarrow=False,
-                    font=dict(size=8, color="grey"),
+                    font=dict(size=12, color="black"),
                     xanchor="right" if r["nux"] < 0 else "left",
                 )
 
@@ -278,9 +278,17 @@ def render_needle_plot(json_path):
     )
     fig.update_layout(
         template="plotly_white",
-        margin=dict(l=0, r=0, b=0, t=40),
-        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
-        title=f"Needle Plot: {json_path.name}",
+        margin=dict(l=0, r=0, b=0, t=60),
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01,
+            font=dict(size=16),
+            bgcolor="rgba(255,255,255,0.8)",
+        ),
+        title=dict(text=f"Needle Plot: {json_path.name}", font=dict(size=24)),
+        font=dict(size=14),  # Global font size
     )
 
     out_file = base_dir / config.get("output_path", "needleplot_output.html")

@@ -134,7 +134,13 @@ def generate_dot_plot(config_path):
                 cmin=settings["cmin"],
                 cmax=settings["cmax"],
                 reversescale=settings.get("reversescale", False),
-                colorbar=dict(title="Cp", thickness=15, x=1.02)
+                colorbar=dict(
+                    title="Cp",
+                    thickness=20,
+                    x=1.02,
+                    tickfont=dict(size=14),
+                    titlefont=dict(size=18),
+                )
                 if idx == n_cases - 1
                 else None,
                 line=dict(
@@ -165,8 +171,16 @@ def generate_dot_plot(config_path):
     # 5. Global Layout settings
     fig.update_layout(
         margin=dict(l=0, r=0, b=0, t=60),
-        title_text="3D Pressure Distribution Comparison",
-        legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01),
+        title=dict(text="3D Pressure Distribution Comparison", font=dict(size=24)),
+        font=dict(size=14),
+        legend=dict(
+            yanchor="top",
+            y=0.99,
+            xanchor="left",
+            x=0.01,
+            font=dict(size=16),
+            bgcolor="rgba(255,255,255,0.5)",
+        ),
     )
 
     # 6. JavaScript Camera Sync
